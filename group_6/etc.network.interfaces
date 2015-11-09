@@ -11,7 +11,7 @@ iface eth0 inet dhcp
  num_ports = 54
 %>
 
-%for port in range(3, num_ports + 1):
+%for port in range(1, num_ports + 1):
 
 auto swp${port}
 iface swp${port}
