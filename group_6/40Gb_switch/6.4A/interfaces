@@ -1,0 +1,50 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*.intf
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto eth0
+iface eth0 inet dhcp
+
+<%
+ start = 1
+ end = 6
+ vlanid = 2
+ num_ports = 32
+%>
+
+auto swp${start}
+iface swp${start}
+ bridge-access ${start+1}
+
+%for port in range(2, end):
+
+%for sfp_num in range(0, 4):
+
+  auto swp${port}s${sfp_num}
+  iface swp${port}s${sfp_num}
+   %if sfp_num % 2:
+    bridge-access ${vlanid}
+   %else:
+    bridge-access ${vlanid}
+    <%
+     vlanid += 1
+    %>
+   %endif
+ %endfor
+%endfor
+
+auto swp${end}
+iface swp${end}
+ bridge-access ${vlanid}
+
+auto bridge
+iface bridge
+ bridge-vlan-aware yes
+ bridge-ports glob swp1 glob swp[2-5]s[0-3] glob swp6
+ bridge-stp off
