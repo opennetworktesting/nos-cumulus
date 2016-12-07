@@ -1,0 +1,53 @@
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto eth0
+iface eth0 inet dhcp
+
+<%
+ vlanid = 2
+ num_ports = 49
+%>
+
+%for port in range(3, num_ports + 1):
+
+auto swp${port}
+iface swp${port}
+ %if port % 2:
+  bridge-access ${vlanid}
+ %else:
+  bridge-access ${vlanid}
+  <%
+   vlanid += 1
+  %>
+ %endif
+%endfor
+
+%for port in range(50, 54):
+
+ %for sfp_num in range(0, 4):
+
+  auto swp${port}s${sfp_num}
+  iface swp${port}s${sfp_num}
+   %if sfp_num % 2:
+    bridge-access ${vlanid}
+   %else:
+    bridge-access ${vlanid}
+    <%
+     vlanid += 1
+    %>
+   %endif
+ %endfor
+%endfor
+
+auto swp54
+iface swp54
+ bridge-access ${vlanid}
+
+auto bridge
+iface bridge
+ bridge-vlan-aware yes
+ bridge-ports glob swp1-${num_ports} glob swp[50-53] glob swp54
+ bridge-stp off
