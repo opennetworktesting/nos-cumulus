@@ -11,10 +11,19 @@ iface eth0 inet dhcp
  num_ports = 54
 %>
 
+auto swp1
+iface swp1
+  link-autoneg on
+
+auto swp2
+iface swp2
+  link-autoneg on
+
 %for port in range(3, num_ports + 1):
 
 auto swp${port}
 iface swp${port}
+  link-autoneg on
  %if port % 2:
   bridge-access ${vlanid}
  %else:
